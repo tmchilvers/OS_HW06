@@ -111,7 +111,7 @@ int main(int argc, char const *argv[])
   int physicalAdd;  //  physical address
   int logicalAdd; //  logical address
   signed char value;  //  value at main memory
-  unsigned char free = 0; //  iterate through page frames in main mem
+  unsigned char frameTemp = 0; //  iterate through page frames in main mem
   int tlbSize = 0;  //  keep track of tlb size
   int index = 0;  // index for fifo
 
@@ -147,14 +147,14 @@ int main(int argc, char const *argv[])
     {
       pageFaults++; //  keep track of how many pageFaults there are
       //  copy memory from the backingstore to the main memory
-      memcpy(mainMem + (free * PAGE_SIZE), backingStoreMap + (logicalAdd * PAGE_SIZE), PAGE_SIZE);
+      memcpy(mainMem + (frameTemp * PAGE_SIZE), backingStoreMap + (logicalAdd * PAGE_SIZE), PAGE_SIZE);
 
       //  set physical address to the frame
-      physicalAdd = free;
+      physicalAdd = frameTemp;
       //  set logical address of pagetable to the frame
-      pageTable[logicalAdd] = free;
+      pageTable[logicalAdd] = frameTemp;
       //  iterate frame for next miss
-      free++;
+      frameTemp++;
     }
 
     //  If no miss, set physical address to frame grabbed from page table
@@ -172,7 +172,7 @@ int main(int argc, char const *argv[])
       {
         //  set values of tlb to current logical address and frame
         t[index].ladd = logicalAdd;
-        t[index].fn = free - 1; //  free - 1 is the frame number before iterating it
+        t[index].fn = frameTemp - 1; //  frameTemp - 1 is the frame number before iterating it
         index++;
         tlbSize++;
       }
@@ -189,7 +189,7 @@ int main(int argc, char const *argv[])
 
         //  Add the most recent logical address and frame to end of the queue
         t[TLB_ENTRS - 1].ladd = logicalAdd;
-        t[TLB_ENTRS - 1].fn = free-1;
+        t[TLB_ENTRS - 1].fn = frameTemp-1;
       }
     }
 
@@ -213,7 +213,7 @@ int main(int argc, char const *argv[])
   printf("\nTLB Hits: %d\n", tlbHits);
   printf("TLB Hit Rate: %.2f%%\n", tlbHitRate);
 
-  free(t);  //  free the tlb memory
+  free(t);  //  frameTemp the tlb memory
   munmap(backingStoreMap, MEM_SIZE);  //  unmap memory
 
   return 0;
