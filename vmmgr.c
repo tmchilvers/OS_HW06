@@ -213,5 +213,8 @@ int main(int argc, char const *argv[])
   printf("\nTLB Hits: %d\n", tlbHits);
   printf("TLB Hit Rate: %.2f%%\n", tlbHitRate);
 
+  free(t);  //  free the tlb memory
+  munmap(backingStoreMap, MEM_SIZE);  //  unmap memory
+
   return 0;
 }
